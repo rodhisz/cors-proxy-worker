@@ -42,7 +42,7 @@ export default {
 		if (!airtableToken || !baseId || !tableName) {
 		  return new Response(JSON.stringify({
 			status: 'error',
-			message: 'Konfigurasi Airtable tidak lengkap'
+			message: 'Incomplete Airtable configuration'
 		  }), {
 			status: 400,
 			headers: {
@@ -79,7 +79,7 @@ export default {
 
 		  return new Response(JSON.stringify({
 			status: 'error',
-			message: 'Gagal mencatat di Airtable',
+			message: 'Failed to log on Airtable',
 			details: errorText
 		  }), {
 			status: 500,
