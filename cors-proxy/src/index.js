@@ -96,7 +96,7 @@ export default {
 		// Kembalikan response sukses
 		return new Response(JSON.stringify({
 		  status: 'success',
-		  message: 'Data berhasil dicatat di Airtable',
+		  message: 'Data successfully recorded in Airtable',
 		  airtableRecords: airtableData.records.map(record => record.id)
 		}), {
 		  status: 200,
