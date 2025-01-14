@@ -5,7 +5,8 @@ compatibility_date = "2024-01-13"
 
 # Tambahkan secrets
 [vars]
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1328304127024824320/GseiriZHpEM_M9DtgfvFjpQd5wevaMfA31n_hNKapXm01uGoRSlVHPHmkeROhqsj3Tey"
+DEFAULT_BASE_ID = "appb7r1094g6sRK9j"
+DEFAULT_TABLE_NAME = "Table1"
 
 # Untuk Airtable, gunakan secrets
 

@@ -33,34 +33,30 @@ export default {
 		const time = requestBody.time || 'N/A';
 		const timestamp = requestBody.timestamp || new Date().toISOString();
 
-		// Logging ke Discord
-		const discordWebhook = env.DISCORD_WEBHOOK_URL;
-		const discordResponse = await fetch(discordWebhook, {
-		  method: 'POST',
-		  headers: {
-			'Content-Type': 'application/json',
-		  },
-		  body: JSON.stringify({
-			content: "New Message Logged",
-			embeds: [{
-			  title: "Message Details",
-			  fields: [
-				{ name: "Sender", value: sender || 'Unknown', inline: true },
-				{ name: "Date", value: date || 'N/A', inline: true },
-				{ name: "Time", value: time || 'N/A', inline: true },
-				{ name: "Timestamp", value: timestamp || 'N/A', inline: false },
-				{ name: "Message", value: message || 'No message content', inline: false }
-			  ],
-			  color: 3066993 // Warna hijau
-			}]
-		  })
-		});
+		// Ambil konfigurasi Airtable dari request atau environment
+		const airtableToken = requestBody.airtableToken || env.AIRTABLE_TOKEN;
+		const baseId = requestBody.baseId || env.DEFAULT_BASE_ID;
+		const tableName = requestBody.tableName || env.DEFAULT_TABLE_NAME;
+
+		// Validasi konfigurasi
+		if (!airtableToken || !baseId || !tableName) {
+		  return new Response(JSON.stringify({
+			status: 'error',
+			message: 'Konfigurasi Airtable tidak lengkap'
+		  }), {
+			status: 400,
+			headers: {
+			  'Content-Type': 'application/json',
+			  'Access-Control-Allow-Origin': '*'
+			}
+		  });
+		}
 
 		// Logging ke Airtable
-		const airtableResponse = await fetch('https://api.airtable.com/v0/appb7r1094g6sRK9j/Table1', {
+		const airtableResponse = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
 		  method: 'POST',
 		  headers: {
-			'Authorization': `Bearer ${env.AIRTABLE_TOKEN}`,
+			'Authorization': `Bearer ${airtableToken}`,
 			'Content-Type': 'application/json'
 		  },
 		  body: JSON.stringify({
@@ -68,25 +64,22 @@ export default {
 			  fields: {
 				'Timestamp': timestamp,
 				'Sender': sender,
-				'Message': message
+				'Message': message,
+				'Date': date,
+				'Time': time
 			  }
 			}]
 		  })
 		});
 
-		// Cek response dari Discord dan Airtable
-		if (!discordResponse.ok) {
-		  console.error('Discord logging failed', await discordResponse.text());
-		}
-
+		// Cek response dari Airtable
 		if (!airtableResponse.ok) {
 		  const errorText = await airtableResponse.text();
 		  console.error('Airtable logging failed', errorText);
 
-		  // Tambahkan logging error yang lebih detail
 		  return new Response(JSON.stringify({
 			status: 'error',
-			message: 'Airtable logging failed',
+			message: 'Gagal mencatat di Airtable',
 			details: errorText
 		  }), {
 			status: 500,
@@ -97,13 +90,13 @@ export default {
 		  });
 		}
 
-		// Parse response Airtable untuk mendapatkan detail record
+		// Parse response Airtable
 		const airtableData = await airtableResponse.json();
 
 		// Kembalikan response sukses
 		return new Response(JSON.stringify({
 		  status: 'success',
-		  message: 'Data logged to Discord and Airtable successfully',
+		  message: 'Data berhasil dicatat di Airtable',
 		  airtableRecords: airtableData.records.map(record => record.id)
 		}), {
 		  status: 200,
@@ -128,4 +121,4 @@ export default {
 		});
 	  }
 	}
-  };
+};
